@@ -25,14 +25,19 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // usa @CrossOrigin de tus controllers
+                // Usamos @CrossOrigin en los controllers
+                .cors(cors -> {})
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
                         // ==== RUTAS PÚBLICAS ====
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/registro", "/api/usuarios/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/ordenes").permitAll() // o autenticado si lo deseas
+                        .requestMatchers(HttpMethod.POST, "/api/ordenes").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        // 👉 NUEVA RUTA PÚBLICA PARA EL DÓLAR
+                        .requestMatchers(HttpMethod.GET, "/api/external/dolar").permitAll()
 
                         // ==== RUTAS SOLO ADMIN ====
                         .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
