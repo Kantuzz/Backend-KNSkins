@@ -2,6 +2,7 @@ package com.csgoskins.catalogservice.service;
 
 import com.csgoskins.catalogservice.model.Usuario;
 import com.csgoskins.catalogservice.repository.UsuarioRepository;
+import com.csgoskins.catalogservice.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final JwtUtil jwtUtil;
 
     // ==========================
     // LISTAR USUARIOS
@@ -64,11 +66,17 @@ public class UsuarioService {
                         return resp;
                     }
 
+                    // ==== GENERAR TOKEN JWT ====
+                    String token = jwtUtil.generateToken(u);
+
                     resp.put("status", "OK");
                     resp.put("id", u.getId());
                     resp.put("email", u.getEmail());
                     resp.put("nombre", u.getNombre());
                     resp.put("role", u.getRole());
+                    resp.put("token", token);
+                    resp.put("expiresIn", jwtUtil.getExpirationMs()); // milisegundos desde ahora
+
                     return resp;
                 })
                 .orElseGet(() -> {
@@ -110,7 +118,7 @@ public class UsuarioService {
 
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if(hex.length() == 1) hexString.append('0');
+                if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
 
