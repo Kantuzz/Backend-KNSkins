@@ -1,15 +1,14 @@
 package com.csgoskins.catalogservice.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.Builder;
 
+
+@Data
+@Builder
 @Entity
 @Table(name = "orden_items")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class OrdenItem {
 
     @Id
@@ -17,11 +16,10 @@ public class OrdenItem {
     private Long id;
 
     private Long productId;
-
     private Integer cantidad;
     private Integer precioUnitario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "orden_id")
     private Orden orden;
 }

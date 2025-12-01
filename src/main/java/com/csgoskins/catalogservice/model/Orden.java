@@ -2,15 +2,15 @@ package com.csgoskins.catalogservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.List;
 
 @Entity
-@Table(name = "ordenes")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "ordenes")
 public class Orden {
 
     @Id
@@ -20,7 +20,6 @@ public class Orden {
     private String clienteNombre;
     private String clienteEmail;
     private String direccionEnvio;
-
     private Integer total;
 
     @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL)

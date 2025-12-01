@@ -17,7 +17,7 @@ public class OrdenService {
 
     public Orden crearOrden(OrdenCreateDto dto) {
 
-        // VALIDAR Y DESCONTAR STOCK
+        // VALIDAR STOCK
         Map<Long, Producto> productosMap = new HashMap<>();
 
         for (var item : dto.getItems()) {
@@ -46,9 +46,7 @@ public class OrdenService {
                 .total(dto.getTotal())
                 .build();
 
-        orden = ordenRepo.save(orden);
-
-        // CREAR ITEMS DE LA ORDEN
+        // Crear items
         List<OrdenItem> items = new ArrayList<>();
 
         for (var itemDto : dto.getItems()) {
@@ -62,15 +60,11 @@ public class OrdenService {
         }
 
         orden.setItems(items);
-        ordenRepo.save(orden);
 
-        return orden;
+        return ordenRepo.save(orden);
     }
 
-    // ============================
-    // MÉTODOS PARA PANEL ADMIN
-    // ============================
-
+    // ADMIN
     public List<Orden> listarTodas() {
         return ordenRepo.findAll();
     }

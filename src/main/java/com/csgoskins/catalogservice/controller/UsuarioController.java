@@ -1,10 +1,12 @@
 package com.csgoskins.catalogservice.controller;
 
 import com.csgoskins.catalogservice.service.UsuarioService;
+import com.csgoskins.catalogservice.model.Usuario;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -14,6 +16,14 @@ import java.util.Map;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+
+    // =====================
+    // LISTAR USUARIOS
+    // =====================
+    @GetMapping
+    public List<Usuario> getAll() {
+        return usuarioService.getAll();
+    }
 
     // =====================
     // REGISTRO
@@ -29,6 +39,14 @@ public class UsuarioController {
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LoginDTO dto) {
         return usuarioService.login(dto.getEmail(), dto.getPassword());
+    }
+
+    // =====================
+    // HACER ADMIN
+    // =====================
+    @PostMapping("/{id}/make-admin")
+    public Map<String, Object> makeAdmin(@PathVariable Long id) {
+        return usuarioService.makeAdmin(id);
     }
 
     // =====================

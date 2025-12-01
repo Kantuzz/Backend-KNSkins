@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -14,6 +15,13 @@ import java.util.Map;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+
+    // ==========================
+    // LISTAR USUARIOS
+    // ==========================
+    public List<Usuario> getAll() {
+        return usuarioRepository.findAll();
+    }
 
     // ==========================
     // REGISTRO
@@ -32,7 +40,7 @@ public class UsuarioService {
         u.setNombre(nombre);
         u.setEmail(email);
         u.setPassword(sha256(password));
-        u.setRole("USER"); // 👈 Puedes cambiarlo a ADMIN manualmente en BD
+        u.setRole("USER");
 
         usuarioRepository.save(u);
 
@@ -60,8 +68,7 @@ public class UsuarioService {
                     resp.put("id", u.getId());
                     resp.put("email", u.getEmail());
                     resp.put("nombre", u.getNombre());
-                    resp.put("role", u.getRole()); // 👈 Ahora sí devolvemos el rol
-
+                    resp.put("role", u.getRole());
                     return resp;
                 })
                 .orElseGet(() -> {
@@ -70,6 +77,26 @@ public class UsuarioService {
                     resp.put("message", "Usuario no encontrado.");
                     return resp;
                 });
+    }
+
+    // ==========================
+    // HACER ADMIN
+    // ==========================
+    public Map<String, Object> makeAdmin(Long id) {
+        Map<String, Object> res = new HashMap<>();
+
+        Usuario u = usuarioRepository.findById(id).orElse(null);
+        if (u == null) {
+            res.put("status", "ERROR");
+            res.put("message", "Usuario no encontrado.");
+            return res;
+        }
+
+        u.setRole("ADMIN");
+        usuarioRepository.save(u);
+
+        res.put("status", "OK");
+        return res;
     }
 
     // ==========================
@@ -83,13 +110,12 @@ public class UsuarioService {
 
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1)
-                    hexString.append('0');
+                if(hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
 
             return hexString.toString();
-        } catch (Exception ex) {
+        } catch(Exception ex){
             throw new RuntimeException(ex);
         }
     }
