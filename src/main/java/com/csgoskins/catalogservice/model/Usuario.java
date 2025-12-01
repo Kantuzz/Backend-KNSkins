@@ -2,6 +2,7 @@ package com.csgoskins.catalogservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.util.Date;
 
 @Entity
 @Data
@@ -19,5 +20,13 @@ public class Usuario {
 
     private String password;
 
-    private String role = "USER"; // Rol por defecto. Puede ser ADMIN o USER
+    private String role = "USER"; // Rol por defecto
+
+    // ================================
+    // FECHA REAL DE CREACIÓN
+    // ================================
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_creacion")
+    private Date fechaCreacion = new Date();
+
 }
