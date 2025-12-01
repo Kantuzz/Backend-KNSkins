@@ -66,4 +66,17 @@ public class OrdenService {
 
         return orden;
     }
+
+    // ============================
+    // MÉTODOS PARA PANEL ADMIN
+    // ============================
+
+    public List<Orden> listarTodas() {
+        return ordenRepo.findAll();
+    }
+
+    public Orden obtenerPorId(Long id) {
+        return ordenRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada: " + id));
+    }
 }

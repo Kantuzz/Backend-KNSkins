@@ -1,44 +1,96 @@
 package com.csgoskins.catalogservice.service;
 
-import com.csgoskins.catalogservice.dto.UsuarioLoginDto;
-import com.csgoskins.catalogservice.dto.UsuarioRegistroDto;
 import com.csgoskins.catalogservice.model.Usuario;
 import com.csgoskins.catalogservice.repository.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
+@RequiredArgsConstructor
 public class UsuarioService {
 
-    private final UsuarioRepository repo;
+    private final UsuarioRepository usuarioRepository;
 
-    public UsuarioService(UsuarioRepository repo) {
-        this.repo = repo;
-    }
+    // ==========================
+    // REGISTRO
+    // ==========================
+    public Map<String, Object> registrar(String nombre, String email, String password) {
 
-    public String registrar(UsuarioRegistroDto dto) {
-        if (repo.findByEmail(dto.getEmail()).isPresent()) {
-            return "El correo ya está registrado.";
+        Map<String, Object> resp = new HashMap<>();
+
+        if (usuarioRepository.findByEmail(email).isPresent()) {
+            resp.put("status", "ERROR");
+            resp.put("message", "El correo ya está registrado.");
+            return resp;
         }
 
         Usuario u = new Usuario();
-        u.setNombre(dto.getNombre());
-        u.setEmail(dto.getEmail());
-        u.setPassword(dto.getPassword()); // si después quieres, lo hashamos
+        u.setNombre(nombre);
+        u.setEmail(email);
+        u.setPassword(sha256(password));
+        u.setRole("USER"); // 👈 Puedes cambiarlo a ADMIN manualmente en BD
 
-        repo.save(u);
+        usuarioRepository.save(u);
 
-        return "Usuario registrado con éxito.";
+        resp.put("status", "OK");
+        resp.put("message", "Usuario registrado exitosamente.");
+        return resp;
     }
 
-    public String login(UsuarioLoginDto dto) {
-        return repo.findByEmail(dto.getEmail())
+    // ==========================
+    // LOGIN
+    // ==========================
+    public Map<String, Object> login(String email, String password) {
+
+        return usuarioRepository.findByEmail(email)
                 .map(u -> {
-                    if (u.getPassword().equals(dto.getPassword())) {
-                        return "Login correcto.";
-                    } else {
-                        return "Contraseña incorrecta.";
+                    Map<String, Object> resp = new HashMap<>();
+
+                    if (!u.getPassword().equals(sha256(password))) {
+                        resp.put("status", "ERROR");
+                        resp.put("message", "Contraseña incorrecta.");
+                        return resp;
                     }
+
+                    resp.put("status", "OK");
+                    resp.put("id", u.getId());
+                    resp.put("email", u.getEmail());
+                    resp.put("nombre", u.getNombre());
+                    resp.put("role", u.getRole()); // 👈 Ahora sí devolvemos el rol
+
+                    return resp;
                 })
-                .orElse("Usuario no encontrado.");
+                .orElseGet(() -> {
+                    Map<String, Object> resp = new HashMap<>();
+                    resp.put("status", "ERROR");
+                    resp.put("message", "Usuario no encontrado.");
+                    return resp;
+                });
+    }
+
+    // ==========================
+    // HASH SHA256
+    // ==========================
+    private String sha256(String base) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1)
+                    hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

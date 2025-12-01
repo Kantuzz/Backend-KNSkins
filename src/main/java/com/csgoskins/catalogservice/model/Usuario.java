@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "usuarios")
 public class Usuario {
 
     @Id
@@ -13,7 +14,10 @@ public class Usuario {
 
     private String nombre;
 
+    @Column(unique = true)
     private String email;
 
     private String password;
+
+    private String role = "USER"; // Rol por defecto. Puede ser ADMIN o USER
 }
